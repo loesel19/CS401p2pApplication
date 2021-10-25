@@ -15,10 +15,20 @@ class ServerSocketHandler extends Thread
         this.connectionList=connectionList;
     }
 
+    /**
+     * this method creates new threads whenever a client tries to connect to the server
+     */
     public void run(){
         Socket clientSocket;
         while (true){
            // wait for incoming connectioins. Start a new Connection Thread for each incoming connection.
+            try {
+                clientSocket = new Socket("localhost",s.serverPort);
+                Connection c = new Connection(clientSocket, connectionList);
+                connectionList.add(c);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
     

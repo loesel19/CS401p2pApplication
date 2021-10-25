@@ -16,22 +16,36 @@ public class Client {
      int peer_listen_port;
      char FILE_VECTOR[];
 
-     public Client(String ip, String filepath) throws FileNotFoundException {
+     public Client(String ip, String filepath) throws IOException {
         String[] initData = parseFile(filepath);
+        System.out.println("CLIENT DATA LOADED ... ");
+        System.out.println(initData[0] + ": " + initData[1] + ": " + initData[2] + ": " + initData[3]);
+        //server port
+        this.serverPort = Integer.parseInt(initData[1]);
+        //socket
+        this.s = new Socket(ip,this.serverPort);
+        //i/o streams
+        this.outputStream = (ObjectOutputStream) s.getOutputStream();
+        this.inputStream = (ObjectInputStream) s.getInputStream();
+        //for the inetadress type we say getByAddress for domain names, and getByName for IP address
+         this.ip = InetAddress.getByName(ip);
+         System.out.println(this.ip.getAddress());
+
+
      }
 
-    public static void main(String args[]) throws FileNotFoundException {
+    public static void main(String args[]) throws IOException {
         // parse client config and server ip.
-        String connectionAddress = "127.0.0.1";
+        String connectionAddress = "localhost";
         // create client object and connect to server. If successfull, print success message , otherwise quit.
-        //Client c = new Client(connectionAddress, "/clientconfig1.txt");
+        Client c = new Client(connectionAddress, "./clientconfig1.txt");
 
         // Once connected, send registration info, event_type=0
        // start a thread to handle server responses. This class is not provided. You can create a new class called ClientPacketHandler to process these requests.
        
         //done! now loop for user input
             while (true){
-                
+                break;
                // wait for user commands.
         }
        
@@ -51,7 +65,6 @@ public class Client {
     public String[] parseFile(String path) throws FileNotFoundException {
          Scanner s = new Scanner(new File(path));
          String[] arr = new String[4];
-         System.out.println(arr[4]);
          //set up for loop with condition of scanner having next line. this way its easy to index array
          for (int i = 0; s.hasNext(); i++){
 arr[i] = s.nextLine().split(" ")[1].trim();

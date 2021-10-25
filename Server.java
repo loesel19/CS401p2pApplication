@@ -28,7 +28,7 @@ public class Server {
         //First, let's start our server and bind it to a port(5000).
        Server s = new Server();
         //Next let's start a thread that will handle incoming connections
-        
+        ServerSocketHandler handler = new ServerSocketHandler(s, s.connectionList);
        
         
         // Note in programs shown in class, at this point we listen for incoming connections in the main method. However for this project since the server has to handle incoming connections and also handle user input simultaneously, we start a separate thread to listen for incoming connections in the Server. This is the ServerSocketHandler thread, which will in turn spawn new Connection Threads, for each client connection.
