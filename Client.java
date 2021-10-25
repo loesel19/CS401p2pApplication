@@ -17,7 +17,7 @@ public class Client {
      char FILE_VECTOR[];
 
      public Client(String ip, String filepath) throws FileNotFoundException {
-        parseFile(filepath);
+        String[] initData = parseFile(filepath);
      }
 
     public static void main(String args[]) throws FileNotFoundException {
@@ -25,8 +25,7 @@ public class Client {
         String connectionAddress = "127.0.0.1";
         // create client object and connect to server. If successfull, print success message , otherwise quit.
         //Client c = new Client(connectionAddress, "/clientconfig1.txt");
-        String[] arr = new String[4];
-        System.out.println(arr[4]);
+
         // Once connected, send registration info, event_type=0
        // start a thread to handle server responses. This class is not provided. You can create a new class called ClientPacketHandler to process these requests.
        
@@ -55,7 +54,7 @@ public class Client {
          System.out.println(arr[4]);
          //set up for loop with condition of scanner having next line. this way its easy to index array
          for (int i = 0; s.hasNext(); i++){
-
+arr[i] = s.nextLine().split(" ")[1].trim();
          }
          //return array format
         /*
@@ -64,6 +63,7 @@ public class Client {
               2: client port num
               3: file vector
          */
+        return arr;
     }
 
 }
