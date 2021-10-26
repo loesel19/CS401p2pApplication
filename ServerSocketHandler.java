@@ -23,7 +23,7 @@ class ServerSocketHandler extends Thread
         while (true){
            // wait for incoming connectioins. Start a new Connection Thread for each incoming connection.
             try {
-                clientSocket = new Socket("localhost",s.serverPort);
+                clientSocket =s.listener.accept();
                 Connection c = new Connection(clientSocket, connectionList);
                 connectionList.add(c);
             } catch (IOException e) {

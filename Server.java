@@ -22,11 +22,11 @@ public class Server {
         connectionList= new ArrayList<>();
     }
     
-    public static void main(String args[])
-    {
+    public static void main(String args[]) throws IOException {
         
         //First, let's start our server and bind it to a port(5000).
        Server s = new Server();
+       s.listener = new ServerSocket();
         //Next let's start a thread that will handle incoming connections
         ServerSocketHandler handler = new ServerSocketHandler(s, s.connectionList);
        
