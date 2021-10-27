@@ -25,7 +25,10 @@ class ServerSocketHandler extends Thread
             try {
                 clientSocket =s.listener.accept();
                 Connection c = new Connection(clientSocket, connectionList);
+
                 connectionList.add(c);
+                System.out.println("New connection added!");
+                System.out.println(connectionList.toString());
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -25,6 +25,8 @@ class Connection extends Thread
         this.inputStream=new ObjectInputStream(socket.getInputStream());
         this.peerIP=socket.getInetAddress();
         this.peerPort=socket.getPort();
+        //set peerID to the size of our connectionList + 1
+        this.peerID = connectionList.size() + 1;
         
     }
 
@@ -45,6 +47,11 @@ class Connection extends Thread
 
         }
 
+    }
+    public String toString(){
+        String str;
+        str = "Socket: " + this.socket + ", peerIP: " + this.peerIP + ", peerID: " + this.peerID + ", peerPort: " + this.peerPort;
+        return str;
     }
 
    

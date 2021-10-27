@@ -25,11 +25,11 @@ public class Client {
         //socket
         this.s = new Socket(ip,this.serverPort);
         //i/o streams
-        this.outputStream = (ObjectOutputStream) s.getOutputStream();
-        this.inputStream = (ObjectInputStream) s.getInputStream();
+        this.outputStream = new ObjectOutputStream(s.getOutputStream());
+        this.inputStream = new ObjectInputStream(s.getInputStream());
         //for the inetadress type we say getByAddress for domain names, and getByName for IP address
          this.ip = InetAddress.getByName(ip);
-         System.out.println(this.ip.getAddress());
+         System.out.println(this.ip);
 
 
      }
@@ -48,6 +48,7 @@ public class Client {
                 break;
                // wait for user commands.
         }
+            System.out.println("outisde of loop");
        
     }
 
