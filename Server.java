@@ -26,7 +26,7 @@ public class Server {
         
         //First, let's start our server and bind it to a port(5000).
        Server s = new Server();
-       s.listener = new ServerSocket();
+       s.listener = new ServerSocket(s.serverPort);
         //Next let's start a thread that will handle incoming connections
         ServerSocketHandler handler = new ServerSocketHandler(s, s.connectionList);
        
