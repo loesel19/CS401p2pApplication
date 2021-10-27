@@ -27,18 +27,23 @@ class Packet implements Serializable{
         5-> Client wants to quit
         6-> Server wants to quit
     */
-    public Packet()
+
+    /**
+     * this constructor will be for sending registration info, so we just need
+     * event type, sender, port number, peerID, File_Vector and peer listen port.
+     */
+    public Packet(int sender, int event_type, int port_number, int peerID, char[] FILE_VECTOR, int peer_listen_port)
     {
-        sender=-1;
+        this.sender= sender;
         recipient=-1;
-        event_type=-1;
-        port_number=-1;
+        this.event_type=event_type;
+        this.port_number= port_number;
         req_file_index=-1;
         peerIP=new char[20];
         Arrays.fill(peerIP,'0');
-        peerID=-1;
-        peer_listen_port=-1;
-        FILE_VECTOR=new char[64];
+        this.peerID= peerID;
+        this.peer_listen_port= peer_listen_port;
+        this.FILE_VECTOR=new char[64];
         Arrays.fill(FILE_VECTOR,'0');
 
     }

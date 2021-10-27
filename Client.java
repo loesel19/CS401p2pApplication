@@ -41,11 +41,13 @@ public class Client {
         Client c = new Client(connectionAddress, "./clientconfig1.txt");
 
         // Once connected, send registration info, event_type=0
+        //create a new packet for sending the registration info
+        Packet p = new Packet(c.peerID, 0, c.serverPort, c.peerID, c.FILE_VECTOR, c.peer_listen_port);
        // start a thread to handle server responses. This class is not provided. You can create a new class called ClientPacketHandler to process these requests.
        
         //done! now loop for user input
             while (true){
-                break;
+break;
                // wait for user commands.
         }
             System.out.println("outisde of loop");
