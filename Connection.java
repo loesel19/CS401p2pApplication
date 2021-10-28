@@ -25,8 +25,6 @@ class Connection extends Thread
         this.inputStream=new ObjectInputStream(socket.getInputStream());
         this.peerIP=socket.getInetAddress();
         this.peerPort=socket.getPort();
-        //set peerID to the size of our connectionList + 1
-        this.peerID = connectionList.size() + 1;
         
     }
 
@@ -35,12 +33,17 @@ class Connection extends Thread
         //wait for register packet.
         // once received, listen for packets with client requests.
         Packet p;
+        System.out.println("Connection is listening for user packets");
         while (true){
             try { 
                 
                 p = (Packet) inputStream.readObject();
+                System.out.println("packet has been received!");
+                p.printPacket();
+                //send p to event handler
                 eventHandler(p);
-               
+                System.out.println(this.toString());
+
 
             }
             catch (Exception e) {break;}
@@ -50,7 +53,7 @@ class Connection extends Thread
     }
     public String toString(){
         String str;
-        str = "Socket: " + this.socket + ", peerIP: " + this.peerIP + ", peerID: " + this.peerID + ", peerPort: " + this.peerPort;
+        str = String.format("%s\n%s\n%s","--------------------", "Peer ID : " + this.peerID, "FILE_VECTOR : " + String.valueOf(this.FILE_VECTOR));
         return str;
     }
 
@@ -58,12 +61,12 @@ class Connection extends Thread
 
    
 
-    public void eventHandler(Packet p)
-    {
+    public void eventHandler(Packet p) throws UnknownHostException {
         int event_type = p.event_type;
         switch (event_type)
         {
             case 0: //client register
+                register(p);
             break;
             
             case 1: // client is requesting a file 
@@ -76,5 +79,19 @@ class Connection extends Thread
     }
     
     //other methods go here
+
+    /**
+     * this method takes in the packet that we want to register, and does such. Registering a Client will consist of
+     * setting the file vector, peer listen port,  and peerID, since the other parameters are initialized in the
+     * connection constructor
+     * @param p
+     */
+    public void register(Packet p) {
+        this.FILE_VECTOR = p.FILE_VECTOR;
+        this.peer_listen_port = p.peer_listen_port;
+        //idk if peer id is supposed to be the id of the sender of the packet or who the packet is going to.
+        this.peerID = p.sender;
+        System.out.println("Registered user: " + this.peerID);
+    }
     
 }

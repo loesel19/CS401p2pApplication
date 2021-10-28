@@ -34,9 +34,13 @@ public class Server {
         System.out.println("Server socket handler is listening for incoming connections");
        
         
-        // Note in programs shown in class, at this point we listen for incoming connections in the main method. However for this project since the server has to handle incoming connections and also handle user input simultaneously, we start a separate thread to listen for incoming connections in the Server. This is the ServerSocketHandler thread, which will in turn spawn new Connection Threads, for each client connection.
+        // Note in programs shown in class, at this point we listen for incoming connections in the main method.
+        // However for this project since the server has to handle incoming connections and also handle user input
+        // simultaneously, we start a separate thread to listen for incoming connections in the Server. This is
+        // the ServerSocketHandler thread, which will in turn spawn new Connection Threads, for each client connection.
         
         //Done! Now main() will just loop for user input!.
+        System.out.println("Server is waiting for user inputs!");
         while (true)
         {
             

@@ -15,13 +15,18 @@ public class Client {
      int peerID;
      int peer_listen_port;
      char FILE_VECTOR[];
+     Scanner sc;
 
      public Client(String ip, String filepath) throws IOException {
         String[] initData = parseFile(filepath);
         System.out.println("CLIENT DATA LOADED ... ");
         System.out.println(initData[0] + ": " + initData[1] + ": " + initData[2] + ": " + initData[3]);
+        //id
+         this.peerID = Integer.parseInt(initData[0]);
         //server port
         this.serverPort = Integer.parseInt(initData[1]);
+        //peer listen port
+         this.peer_listen_port = Integer.parseInt(initData[2]);
         //socket
         this.s = new Socket(ip,this.serverPort);
         //i/o streams
@@ -29,28 +34,39 @@ public class Client {
         this.inputStream = new ObjectInputStream(s.getInputStream());
         //for the inetadress type we say getByAddress for domain names, and getByName for IP address
          this.ip = InetAddress.getByName(ip);
-         System.out.println(this.ip);
+         //file vector
+         this.FILE_VECTOR = initData[3].toCharArray();
 
 
      }
 
-    public static void main(String args[]) throws IOException {
+    public static void main(String args[]) throws IOException, InterruptedException {
         // parse client config and server ip.
         String connectionAddress = "localhost";
-        // create client object and connect to server. If successfull, print success message , otherwise quit.
+        // create client object and connect to server. If successful, print success message , otherwise quit.
         Client c = new Client(connectionAddress, "./clientconfig1.txt");
-
         // Once connected, send registration info, event_type=0
         //create a new packet for sending the registration info
-        Packet p = new Packet(c.peerID, 0, c.serverPort, c.peerID, c.FILE_VECTOR, c.peer_listen_port);
+        Packet p = new Packet(c.peerID, 0,c.s.getPort() , c.peerID, c.FILE_VECTOR, c.peer_listen_port);
+        //send the packet to the server
+        c.outputStream.writeObject(p);
+        c.outputStream.flush();
+        System.out.println("Registration information sent!");
        // start a thread to handle server responses. This class is not provided. You can create a new class called ClientPacketHandler to process these requests.
-       
         //done! now loop for user input
+        c.sc = new Scanner(System.in);
             while (true){
-break;
+                if (c.sc.nextLine().equals("f")){
+                    //send file request packet
+                    p = c.requestFile();
+                    c.outputStream.writeObject(p);
+                    c.outputStream.flush();
+                }else if (c.sc.nextLine().equals("q")){
+                    //close connection for this client
+
+                }
                // wait for user commands.
         }
-            System.out.println("outisde of loop");
        
     }
 
@@ -80,6 +96,22 @@ arr[i] = s.nextLine().split(" ")[1].trim();
               3: file vector
          */
         return arr;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Packet requestFile(){
+        System.out.println("which chunk of the file would you like?");
+        int requested_file_index = sc.nextInt();
+        Packet p = new Packet();
+        p.req_file_index = requested_file_index;
+        //event type for requesting files
+        p.event_type = 1;
+
+
+        return p;
     }
 
 }

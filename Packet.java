@@ -7,7 +7,7 @@ import java.util.*;
 
 class Packet implements Serializable{
     int sender;  // sender id of packet
-    int recipient;  // receipeint id of packet, not required to set for this project
+    int recipient;  // recipient id of packet, not required to set for this project
     int event_type; // see below for event type codes
     int port_number;  // for reporting listening port number, can be found from attribute of socket
     int req_file_index; //which file index is requested
@@ -29,6 +29,22 @@ class Packet implements Serializable{
     */
 
     /**
+     * default constructor for packet
+     */
+    public Packet(){
+        sender=-1;
+        recipient=-1;
+        event_type=-1;
+        port_number=-1;
+        req_file_index=-1;
+        peerIP=new char[20];
+        Arrays.fill(peerIP,'0');
+        peerID=-1;
+        peer_listen_port=-1;
+        FILE_VECTOR=new char[64];
+        Arrays.fill(FILE_VECTOR,'0');
+    }
+    /**
      * this constructor will be for sending registration info, so we just need
      * event type, sender, port number, peerID, File_Vector and peer listen port.
      */
@@ -44,8 +60,7 @@ class Packet implements Serializable{
         this.peerID= peerID;
         this.peer_listen_port= peer_listen_port;
         this.FILE_VECTOR=new char[64];
-        Arrays.fill(FILE_VECTOR,'0');
-
+        this.FILE_VECTOR = FILE_VECTOR;
     }
 
     
