@@ -15,6 +15,8 @@ class Connection extends Thread
     InetAddress peerIP;
     char FILE_VECTOR[];
     ArrayList<Connection> connectionList;
+
+    boolean closing = false;
     
 
     public Connection(Socket socket, ArrayList<Connection> connectionList) throws IOException
@@ -34,7 +36,7 @@ class Connection extends Thread
         // once received, listen for packets with client requests.
         Packet p;
         System.out.println("Connection is listening for user packets");
-        while (true){
+        while (!closing){
             try { 
                 
                 p = (Packet) inputStream.readObject();
@@ -50,6 +52,11 @@ class Connection extends Thread
 
         }
 
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     public String toString(){
         String str;
@@ -73,6 +80,9 @@ class Connection extends Thread
             break;
 
             case 5: // client wants to quit
+                System.out.println( peerID +" at " + peerIP.toString() + " wishes to quit");
+                connectionList.remove(this);
+                this.closing = true;
             break;
            
         };
@@ -93,5 +103,9 @@ class Connection extends Thread
         this.peerID = p.sender;
         System.out.println("Registered user: " + this.peerID);
     }
-    
+
+
+    void send(Packet p) throws IOException {
+        outputStream.writeObject(p);
+    }
 }

@@ -64,11 +64,15 @@ public class Client {
                 c.outputStream.writeUnshared(p);
                 c.outputStream.flush();
             } else if (command.equals("q")) {//close connection for this client
-
+                p.event_type = 5;
+                //using writeUnshared so that it will send the updated packet instead of the cached registration packet
+                c.outputStream.writeUnshared(p);
+                c.outputStream.flush();
+                break;
             }
             // wait for user commands.
         }
-
+        c.s.close();
     }
 
 
