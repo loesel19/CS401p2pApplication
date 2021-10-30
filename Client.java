@@ -31,16 +31,15 @@ public class Client {
         //socket
         System.out.println("Attempting to connect ...");
         //loop in case server hasn't started yet
-        while(true) {
+        while (true) {
             try {
                 //if it successfully connects break out of the loop
                 this.s = new Socket(ip, this.serverPort);
                 break;
-            }catch (ConnectException e){
+            } catch (ConnectException e) {
                 //Gets thrown when attempting to connect to a server that hasn't been started yet,
                 //  or isn't accepting connections
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 System.out.println("Error: Could not connect");
                 //escalate so that main doesn't continue without the socket connected
                 throw e;
@@ -67,7 +66,7 @@ public class Client {
         Client c;
         try {
             c = new Client(connectionAddress, "./clientconfig1.txt");
-        } catch(IOException e){
+        } catch (IOException e) {
             return;
         }
         // Once connected, send registration info, event_type=0
@@ -78,12 +77,17 @@ public class Client {
         c.outputStream.flush();
         System.out.println("Registration information sent!");
         // start a thread to handle server responses. This class is not provided. You can create a new class called ClientPacketHandler to process these requests.
+        ClientPacketHandler handler = new ClientPacketHandler(c.s, c.inputStream);
+        handler.start();
+
         //done! now loop for user input
         c.sc = new Scanner(System.in);
         while (true) {
             String command = c.sc.nextLine();
             if (command.equals("f")) {//send file request packet
                 p = c.requestFile();
+                if (p == null)  //The user already has the file
+                    continue;
                 c.outputStream.writeUnshared(p);
                 c.outputStream.flush();
             } else if (command.equals("q")) {//close connection for this client
@@ -93,7 +97,6 @@ public class Client {
                 c.outputStream.flush();
                 break;
             }
-            // wait for user commands.
         }
         c.s.close();
     }
@@ -131,14 +134,21 @@ public class Client {
      * @return
      */
     public Packet requestFile() {
-        //TODO: check for client already having the requested file
         System.out.println("which chunk of the file would you like?");
         int requested_file_index = sc.nextInt();
+
+        if (requested_file_index < FILE_VECTOR.length && requested_file_index >= 0) {
+            if (FILE_VECTOR[requested_file_index] == '1') {
+                System.out.println("I already have this file block!");
+                return null;
+            }
+        }
+        System.out.println("I don't have this file. Let me contact server...");
+
         Packet p = new Packet();
         p.req_file_index = requested_file_index;
         //event type for requesting files
         p.event_type = 1;
-
 
         return p;
     }
