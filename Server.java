@@ -40,13 +40,13 @@ public class Server {
         //Done! Now main() will just loop for user input!.
         Scanner stdinScanner = new Scanner(System.in);
         System.out.println("Server is waiting for user inputs!");
-        userInputLoop:
         while (true) {
             // wait on user inputs
             String command = stdinScanner.nextLine();
             if (command.equals("q")) {
+                handler.closing.set(true);
                 quit(s.connectionList);
-                break userInputLoop;
+                break;
             } else if (command.equals("p")) {
                 printClients(s.connectionList);
             }

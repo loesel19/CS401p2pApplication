@@ -47,8 +47,10 @@ class Connection extends Thread
                 System.out.println(this.toString());
 
 
-            }
-            catch (Exception e) {break;}
+            }catch (SocketException e){
+                System.out.println("Client " + peerID + " disconnected unexpectedly!");
+                break;
+            } catch (Exception e) {break;}
 
         }
 

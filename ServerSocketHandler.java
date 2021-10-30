@@ -3,13 +3,13 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class ServerSocketHandler extends Thread {
 
     Server s;
     ArrayList<Connection> connectionList;
-    boolean closing = false;
+    AtomicBoolean closing = new AtomicBoolean(false);
 
     public ServerSocketHandler(Server s, ArrayList<Connection> connectionList) {
         this.s = s;
@@ -21,7 +21,7 @@ class ServerSocketHandler extends Thread {
      */
     public void run() {
         Socket clientSocket;
-        while (true) {
+        while (!closing.get()) {
             // wait for incoming connections. Start a new Connection Thread for each incoming connection.
             try {
                 clientSocket = s.listener.accept();
@@ -38,7 +38,7 @@ class ServerSocketHandler extends Thread {
                 }
                 System.out.println("--------------------");
             } catch (IOException e) {
-                if (closing) break;
+                if (closing.get()) break;
                 e.printStackTrace();
             }
         }

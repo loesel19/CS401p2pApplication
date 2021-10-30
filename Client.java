@@ -1,6 +1,7 @@
 // The client class will implement the functions listed in the project description.
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Scanner;
@@ -28,7 +29,24 @@ public class Client {
         //peer listen port
         this.peer_listen_port = Integer.parseInt(initData[2]);
         //socket
-        this.s = new Socket(ip, this.serverPort);
+        System.out.println("Attempting to connect ...");
+        //loop in case server hasn't started yet
+        while(true) {
+            try {
+                //if it successfully connects break out of the loop
+                this.s = new Socket(ip, this.serverPort);
+                break;
+            }catch (ConnectException e){
+                //Gets thrown when attempting to connect to a server that hasn't been started yet,
+                //  or isn't accepting connections
+            }
+            catch (IOException e) {
+                System.out.println("Error: Could not connect");
+                //escalate so that main doesn't continue without the socket connected
+                throw e;
+            }
+        }
+        System.out.println("Connected to server!");
         //i/o streams
         this.outputStream = new ObjectOutputStream(s.getOutputStream());
         this.inputStream = new ObjectInputStream(s.getInputStream());
@@ -46,7 +64,12 @@ public class Client {
         // parse client config and server ip.
         String connectionAddress = "localhost";
         // create client object and connect to server. If successful, print success message , otherwise quit.
-        Client c = new Client(connectionAddress, "./clientconfig1.txt");
+        Client c;
+        try {
+            c = new Client(connectionAddress, "./clientconfig1.txt");
+        } catch(IOException e){
+            return;
+        }
         // Once connected, send registration info, event_type=0
         //create a new packet for sending the registration info
         Packet p = new Packet(c.peerID, 0, c.s.getPort(), c.peerID, c.FILE_VECTOR, c.peer_listen_port);
