@@ -33,7 +33,6 @@ class Connection extends Thread {
     }
 
     //TODO: handle unexpected server disconnection when waiting for packet
-    //TODO: add max connected clients check
     @Override
     public void run() {
         //wait for register packet.

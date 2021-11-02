@@ -3,12 +3,13 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.concurrent.*;
 
 public class Server {
+    //how long to wait for clients to close when shutting down server before force closing
+    private static final int SERVER_CLOSING_TIMEOUT = 50000;   //in ms
 
     int serverPort;
-    int MAX_CONNECTED_CLIENTS;
+    static int MAX_CONNECTED_CLIENTS;
     ServerSocket listener;
     int numClients;
     ArrayList<Connection> connectionList;
@@ -28,7 +29,7 @@ public class Server {
         s.listener = new ServerSocket(s.serverPort);
         //Next let's start a thread that will handle incoming connections
         System.out.println("Server is up");
-        ServerSocketHandler handler = new ServerSocketHandler(s, s.connectionList);
+        ServerSocketHandler handler = new ServerSocketHandler(s, s.connectionList, MAX_CONNECTED_CLIENTS);
         handler.start();
         System.out.println("Server socket handler is listening for incoming connections");
 
@@ -65,7 +66,6 @@ public class Server {
     }
 
     static void quit(ArrayList<Connection> connectionList) {
-        //TODO: make sure all clients have quit before closing
         Packet p = new Packet();
         p.event_type = 6; //Server quitting
 
@@ -74,6 +74,13 @@ public class Server {
                 connection.send(p);
             } catch (Exception e) {
             }
+        }
+
+        long startClosingTime = System.currentTimeMillis();
+        while(connectionList.size() > 0) {
+            //FIXME: socket won't close when any clients are connected. (maybe because it's waiting for input)
+            if ((System.currentTimeMillis() - startClosingTime) > SERVER_CLOSING_TIMEOUT)
+                break;
         }
     }
 }

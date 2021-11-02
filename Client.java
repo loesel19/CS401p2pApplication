@@ -77,13 +77,19 @@ public class Client {
         c.outputStream.flush();
         System.out.println("Registration information sent!");
         // start a thread to handle server responses. This class is not provided. You can create a new class called ClientPacketHandler to process these requests.
-        ClientPacketHandler handler = new ClientPacketHandler(c.s, c.inputStream);
+        ClientPacketHandler handler = new ClientPacketHandler(c.s, c.inputStream,c);
         handler.start();
 
         //done! now loop for user input
         c.sc = new Scanner(System.in);
+        String command;
         while (true) {
-            String command = c.sc.nextLine();
+            //TODO:replace with non-blocking input
+            try {
+               command = c.sc.nextLine();
+            } catch(IllegalStateException e){
+                break;
+            }
             if (command.equals("f")) {//send file request packet
                 p = c.requestFile();
                 if (p == null)  //The user already has the file
@@ -91,10 +97,7 @@ public class Client {
                 c.outputStream.writeUnshared(p);
                 c.outputStream.flush();
             } else if (command.equals("q")) {//close connection for this client
-                p.event_type = 5;
-                //using writeUnshared so that it will send the updated packet instead of the cached registration packet
-                c.outputStream.writeUnshared(p);
-                c.outputStream.flush();
+                c.quit();
                 break;
             }
         }
@@ -153,4 +156,18 @@ public class Client {
         return p;
     }
 
+    public void quit(){
+        Packet closingPacket = new Packet(peerID, 5, s.getPort(), -1, FILE_VECTOR, -1);
+        try {
+            outputStream.writeUnshared(closingPacket);
+            outputStream.flush();
+        } catch (IOException e) {
+        }
+
+        try {
+            s.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

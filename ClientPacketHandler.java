@@ -1,14 +1,17 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class ClientPacketHandler extends Thread {
     Socket s;
     ObjectInputStream inputStream;
+    Client c;
 
-    public ClientPacketHandler(Socket s, ObjectInputStream inputStream) {
+    public ClientPacketHandler(Socket s, ObjectInputStream inputStream, Client c) {
         this.s = s;
         this.inputStream = inputStream;
+        this.c = c;
     }
 
     @Override
@@ -18,6 +21,8 @@ public class ClientPacketHandler extends Thread {
             try {
                 p = (Packet) inputStream.readObject();
                 eventHandler(p);
+            } catch (SocketException e){    //quitting
+                break;
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -32,6 +37,7 @@ public class ClientPacketHandler extends Thread {
                 System.out.printf("Server says that peer %d on listening port %d has file %d%n", p.peerID, p.peer_listen_port, p.req_file_index);
             }
         } else if (p.event_type == 6) {     //Server is quitting
+            c.quit();
         }
     }
 }
