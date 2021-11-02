@@ -71,6 +71,7 @@ public class Server {
 
         for (Connection connection : connectionList) {
             try {
+                System.out.println("trying to quit");
                 connection.send(p);
             } catch (Exception e) {
             }
