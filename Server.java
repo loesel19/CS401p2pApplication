@@ -68,10 +68,10 @@ public class Server {
         //TODO: make sure all clients have quit before closing
         Packet p = new Packet();
         p.event_type = 6; //Server quitting
+        System.out.println("trying to quit");
 
         for (Connection connection : connectionList) {
             try {
-                System.out.println("trying to quit");
                 connection.send(p);
             } catch (Exception e) {
             }

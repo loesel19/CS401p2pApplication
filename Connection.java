@@ -33,7 +33,7 @@ class Connection extends Thread {
     }
 
     //TODO: handle unexpected server disconnection when waiting for packet
-    //TODO: add max connected clients check
+    //xx //TODO: add max connected clients check
     @Override
     public void run() {
         //wait for register packet.
@@ -41,6 +41,7 @@ class Connection extends Thread {
         Packet p;
         System.out.println("Connection is listening for user packets");
         while (!closing) {
+
             try {
                 p = (Packet) inputStream.readObject();
                 System.out.println("packet has been received!");

@@ -24,11 +24,14 @@ class ServerSocketHandler extends Thread {
         while (!closing.get()) {
             // wait for incoming connections. Start a new Connection Thread for each incoming connection.
             try {
-                clientSocket = s.listener.accept();
-                Connection c = new Connection(clientSocket, connectionList);
-                connectionList.add(c);
-                c.start();
-                System.out.println("New connection added!");
+                if (connectionList.size() < 20) {
+                    clientSocket = s.listener.accept();
+                    Connection c = new Connection(clientSocket, connectionList);
+                    connectionList.add(c);
+                    c.start();
+                    System.out.println("New connection added!");
+                }else
+                    System.out.println("Maximum number of clients already connected");
 
                 for (int i = 0; i < connectionList.size(); i++) {
                     Connection t = connectionList.get(i);
