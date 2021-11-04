@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Client {
 
@@ -18,6 +19,8 @@ public class Client {
     int peer_listen_port;
     char FILE_VECTOR[];
     Scanner sc;
+
+    AtomicBoolean closing = new AtomicBoolean(false);
 
     public Client(String ip, String filepath) throws IOException {
         String[] initData = parseFile(filepath);
@@ -80,75 +83,75 @@ public class Client {
         c.sc = new Scanner(System.in);
         String command = "";
 
-        while (true) {
-
-                try {
-//                    Packet res = (Packet) c.inputStream.readObject();
-                        command = c.sc.nextLine();
-                        if (c.s.isClosed())
-                            break;
-                        if (command.equals("f")) {//send file request packet
-                            p = c.requestFile();
-                            if (p == null)  //The user already has the file
-                                continue;
-                            c.outputStream.writeUnshared(p);
-                            c.outputStream.flush();
-                        } else if (command.equals("q")) {//close connection for this client
-                            c.quit();
-                            break;
-                        }
-                    }catch(Exception ex){
-                    ex.printStackTrace();
+        while (!c.closing.get()) {
+            try {
+                if (c.s.isClosed())
+                    break;
+                if (c.sc == null)
+                    break;
+                if (c.sc.hasNextLine()) {
+                    command = c.sc.nextLine();
+                    if (command.equals("f")) {//send file request packet
+                        p = c.requestFile();
+                        if (p == null)  //The user already has the file
+                            continue;
+                        c.outputStream.writeUnshared(p);
+                        c.outputStream.flush();
+                    } else if (command.equals("q")) {//close connection for this client
+                        c.quit();
                         break;
+                    }
                 }
-
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                break;
             }
+        }
         c.sc.close();
         c.s.close();
         System.out.println("out of client loop");
     }
 
 
-
-
-
-
     // implement other methods as necessary
-/**
- * this method will be used to initialize new clients, by checking the command line arguments to see if there is a
- * config file.
- * @return the new Client object.
- */
-public static Client initializeClient(String args[]) throws IOException, ClassNotFoundException {
-    // parse client config and server ip.
-    String connectionAddress = "localhost";
-    // create client object and connect to server. If successful, print success message , otherwise quit.
-    Client c;
-    //see if args were passed in when file was ran
-    String filePath = "";
-    //create
-    if (args.length > 0 && args[0] != "") {
-        if (args[0].equals("-c")) {
-            filePath = args[1];
-            //System.out.println(filePath);
-        } else {
-            //not setting up a config file, some other arguments were passed in, but we dont need to worry about that
-        }
-        try {
-            //just a quick check to see if .txt is in the filePath
-            if (!filePath.contains(".txt"))
-                filePath = filePath + ".txt";
 
-            c = new Client(connectionAddress, filePath);
-        } catch (IOException e) {
-            return null;
+    /**
+     * this method will be used to initialize new clients, by checking the command line arguments to see if there is a
+     * config file.
+     *
+     * @return the new Client object.
+     */
+    public static Client initializeClient(String args[]) throws IOException, ClassNotFoundException {
+        // parse client config and server ip.
+        String connectionAddress = "localhost";
+        // create client object and connect to server. If successful, print success message , otherwise quit.
+        Client c;
+        //see if args were passed in when file was ran
+        String filePath = "";
+        //create
+        if (args.length > 0 && args[0] != "") {
+            if (args[0].equals("-c")) {
+                filePath = args[1];
+                //System.out.println(filePath);
+            } else {
+                //not setting up a config file, some other arguments were passed in, but we dont need to worry about that
+            }
+            try {
+                //just a quick check to see if .txt is in the filePath
+                if (!filePath.contains(".txt"))
+                    filePath = filePath + ".txt";
+
+                c = new Client(connectionAddress, filePath);
+            } catch (IOException e) {
+                return null;
+            }
+        } else {//default client config, just set it to config1
+            c = new Client(connectionAddress, "./clientconfig1.txt");
         }
-    } else {//default client config, just set it to config1
-        c = new Client(connectionAddress, "./clientconfig1.txt");
+        return c;
+
     }
-    return c;
 
-}
     /**
      * this method takes in the filepath for a client config file and returns a string array with values ID, server Port,
      * client port, file vector. since all config files will be of the same structure (for now at least), we can just
@@ -198,7 +201,7 @@ public static Client initializeClient(String args[]) throws IOException, ClassNo
         return p;
     }
 
-    public void quit(){
+    public void quit() {
         Packet closingPacket = new Packet(peerID, 5, s.getPort(), -1, FILE_VECTOR, -1);
         try {
             outputStream.writeUnshared(closingPacket);
@@ -207,7 +210,12 @@ public static Client initializeClient(String args[]) throws IOException, ClassNo
         }
 
         try {
+            closing.set(true);
             s.close();
+
+            //this is not pretty, but short of spoofing console input I have no idea how else to get
+            //  it to exit when it was still expecting scanner input :|
+            System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
         }
