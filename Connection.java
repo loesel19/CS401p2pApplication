@@ -44,7 +44,7 @@ class Connection extends Thread {
             try {
                 p = (Packet) inputStream.readObject();
                 System.out.println("packet has been received!");
-                p.printPacket();
+               // p.printPacket();
                 //send p to event handler
                 eventHandler(p);
                 System.out.println(this.toString());
