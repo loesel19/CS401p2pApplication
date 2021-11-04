@@ -58,72 +58,104 @@ public class Client {
 
     }
 
-    public static void main(String args[]) throws IOException, InterruptedException {
+    public static void main(String args[]) throws IOException, InterruptedException, ClassNotFoundException {
 
-            // parse client config and server ip.
-            String connectionAddress = "localhost";
-            // create client object and connect to server. If successful, print success message , otherwise quit.
-            Client c;
-        //see if args were passed in when file was ran
-        String filePath = "";
-        //
-        if (args.length > 0 && args[0] != "") {
-            if (args[0].equals("-c")){
-                filePath = args[1];
-                //System.out.println(filePath);
-            }else{
-                //not setting up a config file, some other arguments were passed in, but we dont need to worry about that
-            }
-            try {
-                //just a quick check to see if .txt is in the filePath
-                if (!filePath.contains(".txt"))
-                    filePath = filePath + ".txt";
-
-                c = new Client(connectionAddress, filePath);
-            } catch (IOException e) {
-                return;
-            }
+        Client c = initializeClient(args);
+        if (c == null) {
+            System.out.println("Something went wrong, unable to create client");
+            return;
         }
-        else{//default client config, just set it to config1
-            c = new Client(connectionAddress, "./clientconfig1.txt");
-        }
-            // Once connected, send registration info, event_type=0
-            //create a new packet for sending the registration info
-            Packet p = new Packet(c.peerID, 0, c.s.getPort(), c.peerID, c.FILE_VECTOR, c.peer_listen_port);
-            //send the packet to the server
-            c.outputStream.writeObject(p);
-            c.outputStream.flush();
-            System.out.println("Registration information sent!");
-            // start a thread to handle server responses. This class is not provided. You can create a new class called ClientPacketHandler to process these requests.
-            ClientPacketHandler handler = new ClientPacketHandler(c.s, c.inputStream);
-            handler.start();
+        // Once connected, send registration info, event_type=0
+        //create a new packet for sending the registration info
+        Packet p = new Packet(c.peerID, 0, c.s.getPort(), c.peerID, c.FILE_VECTOR, c.peer_listen_port);
+        //send the packet to the server
+        c.outputStream.writeObject(p);
+        c.outputStream.flush();
+        System.out.println("Registration information sent!");
+        // start a thread to handle server responses. This class is not provided. You can create a new class called ClientPacketHandler to process these requests.
+        ClientPacketHandler handler = new ClientPacketHandler(c, c.s, c.inputStream, c.outputStream);
+        handler.start();
 
-            //done! now loop for user input
-            c.sc = new Scanner(System.in);
-            while (true) {
-                String command = c.sc.nextLine();
-                if (command.equals("f")) {//send file request packet
-                    p = c.requestFile();
-                    if (p == null)  //The user already has the file
-                        continue;
-                    c.outputStream.writeUnshared(p);
-                    c.outputStream.flush();
-                } else if (command.equals("q")) {//close connection for this client
-                    p = new Packet();
-                    p.event_type = 5;
-                    //using writeUnshared so that it will send the updated packet instead of the cached registration packet
-                    c.outputStream.writeUnshared(p);
-                    c.outputStream.flush();
-                    break;
+        //done! now loop for user input
+        c.sc = new Scanner(System.in);
+        String command = "";
+
+        while (true) {
+
+                try {
+//                    Packet res = (Packet) c.inputStream.readObject();
+                        command = c.sc.nextLine();
+                        if (c.s.isClosed())
+                            break;
+                        if (command.equals("f")) {//send file request packet
+                            p = c.requestFile();
+                            if (p == null)  //The user already has the file
+                                continue;
+                            c.outputStream.writeUnshared(p);
+                            c.outputStream.flush();
+                        } else if (command.equals("q")) {//close connection for this client
+                            p = new Packet();
+                            p.event_type = 5;
+
+                            //using writeUnshared so that it will send the updated packet instead of the cached registration packet
+                            c.outputStream.writeUnshared(p);
+                            c.outputStream.flush();
+                            break;
+                        }
+                    }catch(Exception ex){
+                    ex.printStackTrace();
+                        break;
                 }
+
             }
-            c.s.close();
-        }
+
+
+        c.sc.close();
+        c.s.close();
+        System.out.println("out of client loop");
+    }
+
+
+
 
 
 
     // implement other methods as necessary
+/**
+ * this method will be used to initialize new clients, by checking the command line arguments to see if there is a
+ * config file.
+ * @return the new Client object.
+ */
+public static Client initializeClient(String args[]) throws IOException, ClassNotFoundException {
+    // parse client config and server ip.
+    String connectionAddress = "localhost";
+    // create client object and connect to server. If successful, print success message , otherwise quit.
+    Client c;
+    //see if args were passed in when file was ran
+    String filePath = "";
+    //create
+    if (args.length > 0 && args[0] != "") {
+        if (args[0].equals("-c")) {
+            filePath = args[1];
+            //System.out.println(filePath);
+        } else {
+            //not setting up a config file, some other arguments were passed in, but we dont need to worry about that
+        }
+        try {
+            //just a quick check to see if .txt is in the filePath
+            if (!filePath.contains(".txt"))
+                filePath = filePath + ".txt";
 
+            c = new Client(connectionAddress, filePath);
+        } catch (IOException e) {
+            return null;
+        }
+    } else {//default client config, just set it to config1
+        c = new Client(connectionAddress, "./clientconfig1.txt");
+    }
+    return c;
+
+}
     /**
      * this method takes in the filepath for a client config file and returns a string array with values ID, server Port,
      * client port, file vector. since all config files will be of the same structure (for now at least), we can just
