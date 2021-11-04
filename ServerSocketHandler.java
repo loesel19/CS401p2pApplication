@@ -24,11 +24,14 @@ class ServerSocketHandler extends Thread {
         while (!closing.get()) {
             // wait for incoming connections. Start a new Connection Thread for each incoming connection.
             try {
-                clientSocket = s.listener.accept();
-                Connection c = new Connection(clientSocket, connectionList);
-                connectionList.add(c);
-                c.start();
-                System.out.println("New connection added!");
+                if (connectionList.size() < 20) {
+                    clientSocket = s.listener.accept();
+                    Connection c = new Connection(clientSocket, connectionList);
+                    connectionList.add(c);
+                    c.start();
+                    System.out.println("New connection added!");
+                }else
+                    System.out.println("Maximum number of clients already connected");
 
                 for (int i = 0; i < connectionList.size(); i++) {
                     Connection t = connectionList.get(i);
@@ -37,11 +40,23 @@ class ServerSocketHandler extends Thread {
 
                 }
                 System.out.println("--------------------");
-            } catch (IOException e) {
-                if (closing.get()) break;
+            } catch (Exception e) {
+                if (closing.get()) {
+                    for (Connection c: connectionList) {
+                        try {
+                            System.out.printf("Peer %d is closing form ip: %s %n", c.peerID,c.peerIP.getHostName());
+                            c.closing =true;
+                        } catch (Exception exception) {
+
+                        }
+                    }
+                    break;
+                }
                 e.printStackTrace();
             }
         }
+        System.out.println("out of server socket handler loop");
+
     }
 
     //other methods may be necessary. Include them when appropriate.

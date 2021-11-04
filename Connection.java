@@ -22,10 +22,11 @@ class Connection extends Thread {
     boolean closing = false;
 
 
-    public Connection(Socket socket, ArrayList<Connection> connectionList) throws IOException {
+    public Connection(Socket socket, ArrayList<Connection> connectionList) throws IOException, ClassNotFoundException {
         this.connectionList = connectionList;
         this.socket = socket;
         this.outputStream = new ObjectOutputStream(socket.getOutputStream());
+        this.outputStream.flush();
         this.inputStream = new ObjectInputStream(socket.getInputStream());
         this.peerIP = socket.getInetAddress();
         this.peerPort = socket.getPort();
@@ -33,7 +34,7 @@ class Connection extends Thread {
     }
 
     //TODO: handle unexpected server disconnection when waiting for packet
-    //TODO: add max connected clients check
+    //xx //TODO: add max connected clients check
     @Override
     public void run() {
         //wait for register packet.
@@ -41,6 +42,7 @@ class Connection extends Thread {
         Packet p;
         System.out.println("Connection is listening for user packets");
         while (!closing) {
+
             try {
                 p = (Packet) inputStream.readObject();
                 System.out.println("packet has been received!");
@@ -57,8 +59,10 @@ class Connection extends Thread {
         }
 
         try {
+
             socket.close();
-        } catch (IOException e) {
+            connectionList.remove(this);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -84,6 +88,9 @@ class Connection extends Thread {
                 connectionList.remove(this);
                 this.closing = true;
                 break;
+            case 6: //server closing
+                System.out.println(peerID + " at " + peerIP.toString() + " is being closed");
+                connectionList.remove(this);
         }
     }
 
@@ -96,7 +103,7 @@ class Connection extends Thread {
      *
      * @param p
      */
-    public void register(Packet p) {
+    public void register(Packet p) throws IOException {
         this.FILE_VECTOR = p.FILE_VECTOR;
         this.peer_listen_port = p.peer_listen_port;
         //idk if peer id is supposed to be the id of the sender of the packet or who the packet is going to.
