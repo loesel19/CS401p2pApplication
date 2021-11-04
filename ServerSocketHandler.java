@@ -24,28 +24,41 @@ class ServerSocketHandler extends Thread {
     public void run() {
         Socket clientSocket;
         while (!closing.get()) {
-            if(connectionList.size() < MAX_CONNECTED_CLIENTS) {
-                // wait for incoming connections. Start a new Connection Thread for each incoming connection.
-                try {
+            // wait for incoming connections. Start a new Connection Thread for each incoming connection.
+            try {
+                if (connectionList.size() < MAX_CONNECTED_CLIENTS) {
                     clientSocket = s.listener.accept();
                     Connection c = new Connection(clientSocket, connectionList);
                     connectionList.add(c);
                     c.start();
                     System.out.println("New connection added!");
+                }else
+                    System.out.println("Maximum number of clients already connected");
 
-                    for (int i = 0; i < connectionList.size(); i++) {
-                        Connection t = connectionList.get(i);
-                        //System.out.println(String.valueOf(t.FILE_VECTOR));
-                        //System.out.println(t.toString());
+                for (int i = 0; i < connectionList.size(); i++) {
+                    Connection t = connectionList.get(i);
+                    //System.out.println(String.valueOf(t.FILE_VECTOR));
+                    //System.out.println(t.toString());
 
-                    }
-                    System.out.println("--------------------");
-                } catch (IOException e) {
-                    if (closing.get()) break;
-                    e.printStackTrace();
                 }
+                System.out.println("--------------------");
+            } catch (Exception e) {
+                if (closing.get()) {
+                    for (Connection c: connectionList) {
+                        try {
+                            System.out.printf("Peer %d is closing form ip: %s %n", c.peerID,c.peerIP.getHostName());
+                            c.closing =true;
+                        } catch (Exception exception) {
+
+                        }
+                    }
+                    break;
+                }
+                e.printStackTrace();
             }
         }
+        System.out.println("out of server socket handler loop");
+
     }
 
     //other methods may be necessary. Include them when appropriate.

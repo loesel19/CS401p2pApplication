@@ -1,17 +1,20 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 
 public class ClientPacketHandler extends Thread {
+    Client c;
     Socket s;
     ObjectInputStream inputStream;
-    Client c;
+    ObjectOutputStream outputStream;
 
-    public ClientPacketHandler(Socket s, ObjectInputStream inputStream, Client c) {
+    public ClientPacketHandler(Client c, Socket s, ObjectInputStream inputStream, ObjectOutputStream outputStream) throws IOException, ClassNotFoundException {
+        this.c = c;
         this.s = s;
         this.inputStream = inputStream;
-        this.c = c;
+        this.outputStream = outputStream;
     }
 
     @Override
@@ -37,7 +40,9 @@ public class ClientPacketHandler extends Thread {
                 System.out.printf("Server says that peer %d on listening port %d has file %d%n", p.peerID, p.peer_listen_port, p.req_file_index);
             }
         } else if (p.event_type == 6) {     //Server is quitting
+            System.out.println("Server is closing. Shutting down...");
             c.quit();
+            System.out.println("scanner closed");
         }
     }
 }

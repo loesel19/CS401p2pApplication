@@ -22,10 +22,11 @@ class Connection extends Thread {
     boolean closing = false;
 
 
-    public Connection(Socket socket, ArrayList<Connection> connectionList) throws IOException {
+    public Connection(Socket socket, ArrayList<Connection> connectionList) throws IOException, ClassNotFoundException {
         this.connectionList = connectionList;
         this.socket = socket;
         this.outputStream = new ObjectOutputStream(socket.getOutputStream());
+        this.outputStream.flush();
         this.inputStream = new ObjectInputStream(socket.getInputStream());
         this.peerIP = socket.getInetAddress();
         this.peerPort = socket.getPort();
@@ -57,7 +58,8 @@ class Connection extends Thread {
 
         try {
             socket.close();
-        } catch (IOException e) {
+            connectionList.remove(this);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

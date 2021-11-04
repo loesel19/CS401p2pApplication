@@ -62,6 +62,11 @@ class Packet implements Serializable{
         this.FILE_VECTOR=new char[64];
         this.FILE_VECTOR = FILE_VECTOR;
     }
+//    public Packet(int sender, int port_number, int event_type){
+//        this.sender = sender;
+//        this.port_number = port_number;
+//        this.event_type = event_type;
+//    }
 
     
     void printPacket()

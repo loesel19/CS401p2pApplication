@@ -68,6 +68,7 @@ public class Server {
     static void quit(ArrayList<Connection> connectionList) {
         Packet p = new Packet();
         p.event_type = 6; //Server quitting
+        System.out.println("trying to quit");
 
         for (Connection connection : connectionList) {
             try {
