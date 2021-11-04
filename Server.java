@@ -61,7 +61,7 @@ public class Server {
     static void printClients(ArrayList<Connection> connectionList) {
         System.out.println("Printing clients:");
         for (Connection connection : connectionList) {
-            System.out.printf("%5s : %s%n", connection.peerID, String.valueOf(connection.FILE_VECTOR));
+            System.out.println(connection.toString());
         }
     }
 
@@ -79,7 +79,6 @@ public class Server {
 
         long startClosingTime = System.currentTimeMillis();
         while(connectionList.size() > 0) {
-            //FIXME: socket won't close when any clients are connected. (maybe because it's waiting for input)
             if ((System.currentTimeMillis() - startClosingTime) > SERVER_CLOSING_TIMEOUT)
                 break;
         }
