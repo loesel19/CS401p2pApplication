@@ -23,7 +23,7 @@ public class Server {
         connectionList = new ArrayList<>();
     }
 
-    public static void main(String args[]) throws IOException {
+    public static void main(String args[]) throws IOException, InterruptedException {
         //First, let's start our server and bind it to a port(5000).
         Server s = new Server();
         s.listener = new ServerSocket(s.serverPort);
@@ -47,6 +47,8 @@ public class Server {
             if (command.equals("q")) {
                 handler.closing.set(true);
                 quit(s.connectionList);
+                System.out.println("All clients disconnected, server shutting down...");
+                System.exit(0); //close down the server, after all  connections have been closed
                 break;
             } else if (command.equals("p")) {
                 printClients(s.connectionList);
